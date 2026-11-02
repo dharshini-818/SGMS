@@ -48,5 +48,16 @@ export async function apiRequest(endpoint, options = {}) {
   return data?.data !== undefined ? data.data : data;
 }
 
+export function toQueryString(params = {}) {
+  const clean = {};
+  for (const [key, val] of Object.entries(params)) {
+    if (val !== undefined && val !== null && val !== '' && val !== 'undefined') {
+      clean[key] = val;
+    }
+  }
+  const qs = new URLSearchParams(clean).toString();
+  return qs ? `?${qs}` : '';
+}
+
 export default apiRequest;
 

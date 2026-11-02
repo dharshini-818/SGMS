@@ -63,15 +63,15 @@ export const StudentManagement = () => {
     }
   };
 
-  const loadStudents = async () => {
+  const loadStudents = async (overrideParams = {}) => {
     try {
       setLoading(true);
       const res = await adminService.getStudents({
-        departmentId: departmentId || undefined,
-        semesterId: semesterId || undefined,
-        academicYearId: academicYearId || undefined,
-        search: search || undefined,
-        page,
+        departmentId: 'departmentId' in overrideParams ? overrideParams.departmentId : (departmentId || undefined),
+        semesterId: 'semesterId' in overrideParams ? overrideParams.semesterId : (semesterId || undefined),
+        academicYearId: 'academicYearId' in overrideParams ? overrideParams.academicYearId : (academicYearId || undefined),
+        search: 'search' in overrideParams ? overrideParams.search : (search || undefined),
+        page: 'page' in overrideParams ? overrideParams.page : page,
         size: 10
       });
       setStudents(res?.content || []);
@@ -97,9 +97,9 @@ export const StudentManagement = () => {
       password: '',
       fullName: '',
       rollNumber: '',
-      departmentId: departments[0]?.id || '',
-      semesterId: semesters[0]?.id || '',
-      academicYearId: academicYears.find(y => y.current)?.id || academicYears[0]?.id || '',
+      departmentId: departments[0]?.id ? String(departments[0].id) : '',
+      semesterId: semesters[0]?.id ? String(semesters[0].id) : '',
+      academicYearId: (academicYears.find(y => y.current)?.id || academicYears[0]?.id) ? String(academicYears.find(y => y.current)?.id || academicYears[0]?.id) : '',
       phone: '',
       address: '',
       dateOfBirth: ''
@@ -115,9 +115,9 @@ export const StudentManagement = () => {
       password: '',
       fullName: stu.fullName,
       rollNumber: stu.rollNumber,
-      departmentId: stu.departmentId,
-      semesterId: stu.semesterId,
-      academicYearId: stu.academicYearId,
+      departmentId: stu.departmentId ? String(stu.departmentId) : '',
+      semesterId: stu.semesterId ? String(stu.semesterId) : '',
+      academicYearId: stu.academicYearId ? String(stu.academicYearId) : '',
       phone: stu.phone || '',
       address: stu.address || '',
       dateOfBirth: stu.dateOfBirth || ''
@@ -128,6 +128,19 @@ export const StudentManagement = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     try {
+      if (!formData.departmentId) {
+        toast.error('Please select a department');
+        return;
+      }
+      if (!formData.semesterId) {
+        toast.error('Please select a semester');
+        return;
+      }
+      if (!formData.academicYearId) {
+        toast.error('Please select an academic year');
+        return;
+      }
+
       if (editingStudent) {
         await adminService.updateStudent(editingStudent.id, formData);
         toast.success('Student updated successfully');
@@ -136,7 +149,12 @@ export const StudentManagement = () => {
         toast.success('Student created and auto-enrolled in subjects');
       }
       setIsModalOpen(false);
-      loadStudents();
+      setSearch('');
+      setDepartmentId('');
+      setSemesterId('');
+      setAcademicYearId('');
+      setPage(0);
+      await loadStudents({ departmentId: undefined, semesterId: undefined, academicYearId: undefined, search: undefined, page: 0 });
     } catch (err) {
       toast.error(err.message || 'Operation failed');
     }
@@ -412,6 +430,25 @@ export const StudentManagement = () => {
               />
             </div>
             <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Date of Birth</label>
+              <input
+                type="date"
+                value={formData.dateOfBirth}
+                onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Address</label>
+              <input
+                type="text"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                placeholder="123 University Road, City"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+              />
+            </div>
+            <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">Department *</label>
               <select
                 required
@@ -419,6 +456,7 @@ export const StudentManagement = () => {
                 onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
               >
+                <option value="">Select Department</option>
                 {departments.map(d => (
                   <option key={d.id} value={d.id}>{d.name} ({d.code})</option>
                 ))}
@@ -432,6 +470,7 @@ export const StudentManagement = () => {
                 onChange={(e) => setFormData({ ...formData, semesterId: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
               >
+                <option value="">Select Semester</option>
                 {semesters.map(s => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
@@ -445,6 +484,7 @@ export const StudentManagement = () => {
                 onChange={(e) => setFormData({ ...formData, academicYearId: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
               >
+                <option value="">Select Academic Year</option>
                 {academicYears.map(y => (
                   <option key={y.id} value={y.id}>{y.yearCode} {y.current ? '(Current)' : ''}</option>
                 ))}

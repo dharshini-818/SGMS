@@ -1,4 +1,4 @@
-import { apiRequest } from './api';
+import { apiRequest, toQueryString } from './api';
 
 export const adminService = {
   getDashboardStats() {
@@ -6,8 +6,7 @@ export const adminService = {
   },
 
   getStudents(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    return apiRequest(`/admin/students?${query}`);
+    return apiRequest(`/admin/students${toQueryString(params)}`);
   },
 
   getStudentById(id) {
@@ -15,16 +14,44 @@ export const adminService = {
   },
 
   createStudent(data) {
+    const payload = {
+      username: data.username?.trim(),
+      email: data.email?.trim(),
+      fullName: data.fullName?.trim(),
+      rollNumber: data.rollNumber?.trim(),
+      departmentId: Number(data.departmentId),
+      semesterId: Number(data.semesterId),
+      academicYearId: Number(data.academicYearId),
+    };
+    if (data.password && data.password.trim()) payload.password = data.password.trim();
+    if (data.phone && data.phone.trim()) payload.phone = data.phone.trim();
+    if (data.address && data.address.trim()) payload.address = data.address.trim();
+    if (data.dateOfBirth && data.dateOfBirth.trim()) payload.dateOfBirth = data.dateOfBirth.trim();
+
     return apiRequest('/admin/students', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(payload)
     });
   },
 
   updateStudent(id, data) {
+    const payload = {
+      username: data.username?.trim(),
+      email: data.email?.trim(),
+      fullName: data.fullName?.trim(),
+      rollNumber: data.rollNumber?.trim(),
+      departmentId: Number(data.departmentId),
+      semesterId: Number(data.semesterId),
+      academicYearId: Number(data.academicYearId),
+    };
+    if (data.password && data.password.trim()) payload.password = data.password.trim();
+    if (data.phone && data.phone.trim()) payload.phone = data.phone.trim();
+    if (data.address && data.address.trim()) payload.address = data.address.trim();
+    if (data.dateOfBirth && data.dateOfBirth.trim()) payload.dateOfBirth = data.dateOfBirth.trim();
+
     return apiRequest(`/admin/students/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(data)
+      body: JSON.stringify(payload)
     });
   },
 
@@ -41,21 +68,44 @@ export const adminService = {
   },
 
   getFaculties(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    return apiRequest(`/admin/faculties?${query}`);
+    return apiRequest(`/admin/faculties${toQueryString(params)}`);
   },
 
   createFaculty(data) {
+    const payload = {
+      username: data.username?.trim(),
+      email: data.email?.trim(),
+      fullName: data.fullName?.trim(),
+      employeeId: data.employeeId?.trim(),
+      departmentId: Number(data.departmentId),
+    };
+    if (data.password && data.password.trim()) payload.password = data.password.trim();
+    if (data.designation && data.designation.trim()) payload.designation = data.designation.trim();
+    if (data.phone && data.phone.trim()) payload.phone = data.phone.trim();
+    if (data.qualification && data.qualification.trim()) payload.qualification = data.qualification.trim();
+
     return apiRequest('/admin/faculties', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(payload)
     });
   },
 
   updateFaculty(id, data) {
+    const payload = {
+      username: data.username?.trim(),
+      email: data.email?.trim(),
+      fullName: data.fullName?.trim(),
+      employeeId: data.employeeId?.trim(),
+      departmentId: Number(data.departmentId),
+    };
+    if (data.password && data.password.trim()) payload.password = data.password.trim();
+    if (data.designation && data.designation.trim()) payload.designation = data.designation.trim();
+    if (data.phone && data.phone.trim()) payload.phone = data.phone.trim();
+    if (data.qualification && data.qualification.trim()) payload.qualification = data.qualification.trim();
+
     return apiRequest(`/admin/faculties/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(data)
+      body: JSON.stringify(payload)
     });
   },
 
@@ -66,21 +116,40 @@ export const adminService = {
   },
 
   getSubjects(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    return apiRequest(`/admin/subjects?${query}`);
+    return apiRequest(`/admin/subjects${toQueryString(params)}`);
   },
 
   createSubject(data) {
+    const payload = {
+      code: data.code?.trim(),
+      name: data.name?.trim(),
+      credits: Number(data.credits),
+      departmentId: Number(data.departmentId),
+      semesterId: Number(data.semesterId),
+    };
+    const facId = data.assignedFacultyId || data.facultyId;
+    if (facId) payload.assignedFacultyId = Number(facId);
+
     return apiRequest('/admin/subjects', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(payload)
     });
   },
 
   updateSubject(id, data) {
+    const payload = {
+      code: data.code?.trim(),
+      name: data.name?.trim(),
+      credits: Number(data.credits),
+      departmentId: Number(data.departmentId),
+      semesterId: Number(data.semesterId),
+    };
+    const facId = data.assignedFacultyId || data.facultyId;
+    if (facId) payload.assignedFacultyId = Number(facId);
+
     return apiRequest(`/admin/subjects/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(data)
+      body: JSON.stringify(payload)
     });
   },
 
@@ -110,8 +179,7 @@ export const adminService = {
   },
 
   getGrades(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    return apiRequest(`/admin/grades?${query}`);
+    return apiRequest(`/admin/grades${toQueryString(params)}`);
   },
 
   correctGrade(id, internalMarks, externalMarks, remarks) {
@@ -127,4 +195,3 @@ export const adminService = {
     });
   }
 };
-
